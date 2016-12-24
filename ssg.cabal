@@ -1,0 +1,30 @@
+name:                ssg
+version:             1.0
+license:             BSD3
+license-file:        LICENSE
+author:              Eunchan Kim
+maintainer:          me@eunchan.kim
+category:            Web
+build-type:          Simple
+cabal-version:       >=1.18
+
+executable ssg
+  main-is:             main.hs
+  build-depends:       base         >=4        && < 5     ,
+                       binary       >= 0.8                ,
+                       blaze-html   >= 0.5                ,
+                       hakyll       >= 4.8                ,
+                       pandoc       >= 1.13    && < 2     ,
+                       containers   >= 0.5                ,
+                       process      >= 1.2                ,
+                       directory    >= 1.2                ,
+                       filepath     >= 1.3                ,
+                       time                               ,
+                       aeson                              ,
+                       unordered-containers               ,
+                       blaze-markup
+
+  Hs-source-dirs:      src/
+  other-modules:       Sky, Post, Blog, Config
+  Ghc-Options:         -Wall
+  default-language:    Haskell2010

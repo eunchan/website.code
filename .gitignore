@@ -1,0 +1,13 @@
+Makefile
+.cache
+.site
+.sass-cache
+.stack-work
+*~
+*.hi
+*.o
+hakyll
+*.exe
+.DS_Store
+*.swp
+/*.sublime-*
