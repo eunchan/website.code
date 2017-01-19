@@ -10,7 +10,7 @@ It is based on hakyll example but a few features are added.
 2.  Global link (markdown format) is used for entire site.
     `links.md` is loaded for every post.
     Also, if any post defines `slug` metadata, then it is used as link.
-    This helps to keep the intra link correctly.
+    This helps to keep the intra website link correctly.
 3.  Yearly archives are added for normal pages (excluding Blogs and Nightsky observation logs).
     Archive links will be in the format of `archives/YYYY/index.html`
-4.  Blogs has teaser list page as a front. 
+4.  Blogs has teaser list page as a front.
