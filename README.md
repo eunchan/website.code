@@ -14,3 +14,14 @@ It is based on hakyll example but a few features are added.
 3.  Yearly archives are added for normal pages (excluding Blogs and Nightsky observation logs).
     Archive links will be in the format of `archives/YYYY/index.html`
 4.  Blogs has teaser list page as a front.
+
+## Templates
+
+To build this website, couple of templates are required.
+
+-   `default.html`: Main template. Contains head, and footer.
+-   `disqus.html`: If metadata `disqus` field is true, this template will be rendered.
+-   `teaser.html`: This template is for blog main page ('Journal').
+-   `blogpage.html`: Since blog has previous post and next post, this template is to support the feature.
+-   `post-list.html`: This is for list of posts that is included in index page and also list of sky logs.
+-   `sites.json`: This template is for Nightsky sites. Nightsky page parses json then display it on Google Maps.
