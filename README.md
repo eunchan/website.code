@@ -3,7 +3,7 @@
 This [Hakyll][] configuration is for [Eunchan.Kim website](https://www.eunchan.kim).
 It is based on hakyll example but a few features are added.
 
-[Hakyll]: http://jaspervdj.org/hakyll
+[Hakyll]: http://jaspervdj.be/hakyll
 
 1.  Nightsky observation log is added.
     So, all the logs can be viewed on the Google Maps.
