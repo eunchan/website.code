@@ -75,7 +75,7 @@ main = do
         create ["index.md"] $ do
             route $ setExtension ".html"
             compile $ do
-                recentposts <- fmap (take 7) . recentFirst =<< loadEverything
+                recentposts <- fmap (take 7) . publicOnly . recentFirst =<< loadEverything
                 let ctx = listField "posts" ekCtx (return recentposts) <>
                           field "years" (\_ -> renderYears years) <>
                           defaultContext
@@ -92,7 +92,7 @@ main = do
             create [yearId year] $ do
                 route idRoute
                 compile $ do
-                    posts <- recentFirst =<< loadPostYear year "page/**.md"
+                    posts <- publicOnly . recentFirst =<< loadPostYear year "page/**.md"
                     let postsCtx = mconcat
                                    [ listField "posts" ekCtx (return posts)
                                    , constField "title" ("Posts published in " ++ year)
