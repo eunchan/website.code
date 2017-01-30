@@ -8,6 +8,7 @@ module Post
     , moveToUpper
     , getResourceBodyIfExist
     , postIsPublic
+    , postIsPublicOrDraft
     , publicOnly
     , isPublic
     , ekCtx
@@ -122,6 +123,9 @@ metadataFieldIs key value metadata =
 
 postIsPublic :: Metadata -> Bool
 postIsPublic = metadataFieldIs "public" "true"
+
+postIsPublicOrDraft :: Metadata -> Bool
+postIsPublicOrDraft md = (postIsPublic md) || (metadataFieldIs "public" "draft" md) 
 
 moveToUpper :: Routes
 moveToUpper = customRoute stripTopDir

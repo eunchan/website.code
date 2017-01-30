@@ -42,14 +42,14 @@ blogRules :: Rules ()
 blogRules = do
     tags <- buildTags postsGlob (fromCapture "blog/tag/*.html")
 
-    matchMetadata postsGlob postIsPublic $ blogPost "blog"            -- snapshot name
+    matchMetadata postsGlob postIsPublicOrDraft $ blogPost "blog"            -- snapshot name
                                                     (dateRoute "blog/") -- Route
                                                     defaultContext    -- context
 
     create ["blog/posts.html"] $ do
         route idRoute
         compile $ do
-            blogposts <- recentFirst =<< loadAllSnapshots postsGlob "blog"
+            blogposts <- publicOnly . recentFirst =<< loadAllSnapshots postsGlob "blog"
             let ctx = constField "title" "Archive" <>
                       listField "posts" defaultContext (return blogposts) <>
                       defaultContext
