@@ -85,6 +85,7 @@ main = do
                     >>= renderPandocWith defaultHakyllReaderOptions ekWriterOptions
                     >>= loadAndApplyTemplate "_tpl/posts.html" ctx
                     >>= loadAndApplyTemplate "_tpl/default.html" ctx
+                    >>= slashIndexUrls
                     >>= relativizeUrls
 
         -- | TODO: Pull the posts in the year.
@@ -102,6 +103,7 @@ main = do
                     makeItem ""
                         >>= loadAndApplyTemplate "_tpl/posts.html" postsCtx
                         >>= loadAndApplyTemplate "_tpl/default.html" postsCtx
+                        >>= slashIndexUrls
                         >>= relativizeUrls
         -- Read templates
         match "_tpl/*" $ compile templateCompiler

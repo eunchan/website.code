@@ -46,6 +46,7 @@ skyRules = do
             makeItem cloud
                 >>= loadAndApplyTemplate "_tpl/post.html" ekCtx
                 >>= loadAndApplyTemplate "_tpl/default.html" ekCtx
+                >>= slashIndexUrls
                 >>= relativizeUrls
 
     create ["sky/index.html"] $ do
@@ -59,6 +60,7 @@ skyRules = do
             makeItem ""
                 >>= loadAndApplyTemplate "_tpl/posts.html" ctx
                 >>= loadAndApplyTemplate "_tpl/default.html" ctx
+                >>= slashIndexUrls
                 >>= relativizeUrls
 
     tagsRules skybodies (skytagsRules "skybody")
@@ -70,6 +72,7 @@ skyRules = do
             makeItem cloud
                 >>= loadAndApplyTemplate "_tpl/post.html" defaultContext
                 >>= loadAndApplyTemplate "_tpl/default.html" defaultContext
+                >>= slashIndexUrls
                 >>= relativizeUrls
 
     tagsRules skysites (skytagsRules "skysite")
@@ -122,6 +125,7 @@ skytagsRules snapshot token pattern = do
             >>= saveSnapshot snapshot
             >>= loadAndApplyTemplate "_tpl/posts.html" ctx
             >>= loadAndApplyTemplate "_tpl/default.html" ctx
+            >>= slashIndexUrls
             >>= relativizeUrls
 
 --------------------------------------------------------------------------------

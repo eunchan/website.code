@@ -14,6 +14,7 @@ module Post
     , ekCtx
     , dateRoute
     , mediaUrls
+    , slashIndexUrls
     , buildYears
     , renderYears
     , loadPostYear
@@ -75,6 +76,7 @@ postCompile item ss tpl ctx = do
         >>= loadDisqus ctx
         >>= loadAndApplyTemplate tpl ctx
         >>= loadAndApplyTemplate "_tpl/default.html" ctx
+        >>= slashIndexUrls
         >>= relativizeUrls
 
 -- | loadEverything that returns every post
@@ -125,7 +127,7 @@ postIsPublic :: Metadata -> Bool
 postIsPublic = metadataFieldIs "public" "true"
 
 postIsPublicOrDraft :: Metadata -> Bool
-postIsPublicOrDraft md = (postIsPublic md) || (metadataFieldIs "public" "draft" md) 
+postIsPublicOrDraft md = (postIsPublic md) || (metadataFieldIs "public" "draft" md)
 
 moveToUpper :: Routes
 moveToUpper = customRoute stripTopDir
@@ -201,6 +203,22 @@ prefixUrlsWith new pf = withUrls rel
   where
     isRel x = pf `isPrefixOf` x && not ("//" `isPrefixOf` x)
     rel x   = if isRel x then new ++ (replaceAll pf (const "") x) else x
+
+-- | slashIndexUrls chops `index.html` to prettify URL address on the browser
+slashIndexUrls :: Item String
+               -> Compiler (Item String)
+slashIndexUrls item = do
+    r <- getRoute $ itemIdentifier item
+    return $ case r of
+        Nothing -> item
+        Just _  -> fmap chopIndexHtml item
+
+chopIndexHtml :: String
+              -> String
+chopIndexHtml = withUrls ind
+  where
+    ind x = if isIndexHtml x then (replaceAll "index.html" (const "") x) else x
+    isIndexHtml x = "index.html" == takeFileName x
 
 --------------------------------------------------------------------------------
 -- | Yearly Archive

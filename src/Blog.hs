@@ -88,6 +88,7 @@ blogRules = do
                 makeItem ""
                     >>= loadAndApplyTemplate "_tpl/blogpage.html" postsCtx
                     >>= loadAndApplyTemplate "_tpl/default.html" allCtx
+                    >>= slashIndexUrls
                     >>= relativizeUrls
 
 --------------------------------------------------------------------------------
