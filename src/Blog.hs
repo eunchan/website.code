@@ -42,7 +42,7 @@ blogRules :: Rules ()
 blogRules = do
     tags <- buildTags postsGlob (fromCapture "blog/tag/*.html")
 
-    matchMetadata postsGlob postIsPublicOrDraft $ blogPost "blog"            -- snapshot name
+    matchMetadata postsGlob postIsPublic $ blogPost "blog"            -- snapshot name
                                                     (dateRoute "blog/") -- Route
                                                     defaultContext    -- context
 
@@ -68,10 +68,7 @@ blogRules = do
         create [bId] $ do
             route idRoute
             compile $ do
-                let allCtx =
-                        field "title" (\_ -> return "Journal") `mappend`
-                        defaultContext
-                    loadTeaser id' = loadSnapshot id' "blog"
+                let loadTeaser id' = loadSnapshot id' "blog"
                         >>= loadAndApplyTemplate "_tpl/teaser.html" (teaserCtx tags)
                 items <- mapM loadTeaser itemsForPage
                 let itembodies = map itemBody items

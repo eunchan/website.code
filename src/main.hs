@@ -66,7 +66,7 @@ main = do
         skyRules
 
         -- Render Posts (See Post.hs)
-        matchMetadata "page/**.md" postIsPublicOrDraft $ post "post" moveToUpper defaultContext -- moveToUpper
+        matchMetadata "page/**.md" postIsPublic $ post "post" moveToUpper defaultContext -- moveToUpper
 
         -- | Yearly Archive
         years <- buildYears "page/**.md"
