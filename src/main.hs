@@ -83,10 +83,7 @@ main = do
                 links <- loadBody "links.md"
                 makeItem (itemBody body ++ "\n" ++ links)
                     >>= renderPandocWith defaultHakyllReaderOptions ekWriterOptions
-                    >>= loadAndApplyTemplate "_tpl/posts.html" ctx
-                    >>= loadAndApplyTemplate "_tpl/default.html" ctx
-                    >>= slashIndexUrls
-                    >>= relativizeUrls
+                    >>= templateAndUrl "_tpl/posts.html" ctx
 
         -- | TODO: Pull the posts in the year.
         forM_ years $ \(year, _) ->
@@ -101,9 +98,6 @@ main = do
                                    , defaultContext
                                    ]
                     makeItem ""
-                        >>= loadAndApplyTemplate "_tpl/posts.html" postsCtx
-                        >>= loadAndApplyTemplate "_tpl/default.html" postsCtx
-                        >>= slashIndexUrls
-                        >>= relativizeUrls
+                        >>= templateAndUrl "_tpl/posts.html" postsCtx
         -- Read templates
         match "_tpl/*" $ compile templateCompiler

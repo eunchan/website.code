@@ -76,6 +76,7 @@ blogRules = do
                 items <- mapM loadTeaser itemsForPage
                 let itembodies = map itemBody items
                     postsCtx =
+                        field "title" (\_ -> return "Journal") `mappend`
                         constField "posts" (concat itembodies) `mappend`
                         field "navlinkolder" (\_ -> return $ indexNavLink index 1 maxIndex) `mappend`
                         field "navlinknewer" (\_ -> return $ indexNavLink index (-1) maxIndex) `mappend`
@@ -86,10 +87,7 @@ blogRules = do
                         defaultContext
 
                 makeItem ""
-                    >>= loadAndApplyTemplate "_tpl/blogpage.html" postsCtx
-                    >>= loadAndApplyTemplate "_tpl/default.html" allCtx
-                    >>= slashIndexUrls
-                    >>= relativizeUrls
+                    >>= templateAndUrl "_tpl/blogpage.html" postsCtx
 
 --------------------------------------------------------------------------------
 -- | post function

@@ -3,6 +3,7 @@
 module Post
     ( post
     , postCompile
+    , templateAndUrl
     , loadDisqus
     , loadEverything
     , moveToUpper
@@ -74,6 +75,14 @@ postCompile item ss tpl ctx = do
         >>= renderPandocWith defaultHakyllReaderOptions ekWriterOptions
         >>= saveSnapshot ss
         >>= loadDisqus ctx
+        >>= templateAndUrl tpl ctx
+
+templateAndUrl :: Identifier        -- first templateAndUrl
+               -> Context String    -- Context
+               -> Item String       -- Item Body
+               -> Compiler (Item String)
+templateAndUrl tpl ctx item = do
+    return item
         >>= loadAndApplyTemplate tpl ctx
         >>= loadAndApplyTemplate "_tpl/default.html" ctx
         >>= slashIndexUrls

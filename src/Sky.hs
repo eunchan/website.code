@@ -44,10 +44,7 @@ skyRules = do
         compile $ do
             cloud <- renderTagCloud 90 220 skybodies
             makeItem cloud
-                >>= loadAndApplyTemplate "_tpl/post.html" ekCtx
-                >>= loadAndApplyTemplate "_tpl/default.html" ekCtx
-                >>= slashIndexUrls
-                >>= relativizeUrls
+                >>= templateAndUrl "_tpl/post.html" ekCtx
 
     create ["sky/index.html"] $ do
         route idRoute
@@ -58,10 +55,7 @@ skyRules = do
                       constField "mapindex" "on" <>
                       defaultContext
             makeItem ""
-                >>= loadAndApplyTemplate "_tpl/posts.html" ctx
-                >>= loadAndApplyTemplate "_tpl/default.html" ctx
-                >>= slashIndexUrls
-                >>= relativizeUrls
+                >>= templateAndUrl "_tpl/posts.html" ctx
 
     tagsRules skybodies (skytagsRules "skybody")
 
@@ -70,10 +64,7 @@ skyRules = do
         compile $ do
             cloud <- renderTagCloud 90 220 skysites
             makeItem cloud
-                >>= loadAndApplyTemplate "_tpl/post.html" defaultContext
-                >>= loadAndApplyTemplate "_tpl/default.html" defaultContext
-                >>= slashIndexUrls
-                >>= relativizeUrls
+                >>= templateAndUrl "_tpl/post.html" defaultContext
 
     tagsRules skysites (skytagsRules "skysite")
 
@@ -120,13 +111,8 @@ skytagsRules snapshot token pattern = do
 
         body <- getResourceBodyIfExist
         links <- loadBody "links.md"
-        makeItem (itemBody body ++ "\n\n" ++ links)
-            >>= renderPandocWith defaultHakyllReaderOptions ekWriterOptions
-            >>= saveSnapshot snapshot
-            >>= loadAndApplyTemplate "_tpl/posts.html" ctx
-            >>= loadAndApplyTemplate "_tpl/default.html" ctx
-            >>= slashIndexUrls
-            >>= relativizeUrls
+        item <- makeItem (itemBody body ++ "\n\n" ++ links)
+        postCompile item snapshot "_tpl/posts.html" ctx
 
 --------------------------------------------------------------------------------
 -- | Integrated function (buildBodies, buildSites)
