@@ -211,7 +211,9 @@ teaserBody item = do
         replaceAll "<figure>"       (const "") .
         replaceAll "</figure>"      (const "") .
         replaceAll "<figcaption>"   (const "") .
-        replaceAll "</figcaption>"  (const "")
+        replaceAll "</figcaption>"  (const "") .
+        replaceAll "<div [^>]*>"    (const "") .
+        replaceAll "</div>"         (const "") 
 
 -- | Identifier로 해당 글이 public post인지 판독
 idPublic :: MonadMetadata m
