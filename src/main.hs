@@ -49,7 +49,7 @@ main = do
                 >>= loadAndApplyTemplate "_tpl/default.html" defaultContext
 
         -- Build slug list [(Slug, Identifier)]
-        slugs <- buildSlugs ("page/**.md" .||. "sky/log/**.md" .||. "blog/**.md")
+        slugs <- buildSlugs ("page/**.md" .||. "sky/**.md" .||. "blog/**.md")
 
         -- Include link file. This file's content will be included in all markdown files.
         -- 'links.md' is compiled with slug list so that the other post compile
