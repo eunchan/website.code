@@ -74,7 +74,6 @@ postCompile item ss tpl ctx = do
     return item
         >>= renderPandocWith defaultHakyllReaderOptions ekWriterOptions
         >>= saveSnapshot ss
-        >>= loadDisqus ctx
         >>= templateAndUrl tpl ctx
 
 templateAndUrl :: Identifier        -- first templateAndUrl
@@ -84,6 +83,7 @@ templateAndUrl :: Identifier        -- first templateAndUrl
 templateAndUrl tpl ctx item = do
     return item
         >>= loadAndApplyTemplate tpl ctx
+        >>= loadDisqus ctx
         >>= loadAndApplyTemplate "_tpl/default.html" ctx
         >>= slashIndexUrls
         >>= relativizeUrls
