@@ -99,5 +99,15 @@ main = do
                                    ]
                     makeItem ""
                         >>= templateAndUrl "_tpl/posts.html" postsCtx
+
+        create ["rss.xml"] $ do
+            route idRoute
+            compile $
+                loadEverything
+                    >>= fmap (take 10) . publicOnly . recentFirst
+                    >>= renderRss (feedConfiguration "Posts") feedCtx
         -- Read templates
         match "_tpl/*" $ compile templateCompiler
+
+allGlob :: Pattern
+allGlob = postsGlob .||. "page/**.md"
