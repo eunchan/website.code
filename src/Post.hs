@@ -91,7 +91,7 @@ templateAndUrl tpl ctx item = do
 -- | loadEverything that returns every post
 loadEverything :: (Binary a, Typeable a) => Compiler [Item a]
 loadEverything = do
-    posts <- loadAll "page/**.md"
+    posts <- loadAllSnapshots "page/**.md" "post"
     skylog <- loadAllSnapshots ("sky/log/*.md" .||. "sky/*.md") "skylog"
     blog <- loadAllSnapshots ("blog/**.md" .&&. complement "blog/index.md") "blog"
     return $ posts ++ skylog ++ blog
