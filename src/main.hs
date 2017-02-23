@@ -105,7 +105,7 @@ main = do
             compile $
                 loadEverything
                     >>= fmap (take 10) . publicOnly . recentFirst
-                    >>= renderRss (feedConfiguration "Posts") feedCtx
+                    >>= renderRss (feedConfiguration "Eunchan.Kim") feedCtx
         -- Read templates
         match "_tpl/*" $ compile templateCompiler
 

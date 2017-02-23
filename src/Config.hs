@@ -24,8 +24,8 @@ feedCtx = mconcat
 
 feedConfiguration :: String -> FeedConfiguration
 feedConfiguration title = FeedConfiguration
-    { feedTitle       = title ++ " [eunchan.net]"
-    , feedDescription = "Personal blog"
+    { feedTitle       = title
+    , feedDescription = "Everything"
     , feedAuthorName  = "Eunchan"
     , feedAuthorEmail = "me@eunchan.kim"
     , feedRoot        = "https://www.eunchan.kim"
