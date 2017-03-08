@@ -243,7 +243,7 @@ paginate itemsPerPage rules = do
     --       nodate 일경우 또는 date metafield가 없을 경우, 리스트에서 제외할 것.
     identifiers <- filterPublic postsGlob
 
-    let sorted = sortBy (flip byDate) identifiers
+    let sorted = sortIdentifiersByDate identifiers
         chunks = chunk itemsPerPage sorted
         maxIndex = length chunks
         pageNumbers = take maxIndex [1..]

@@ -1,9 +1,6 @@
 --------------------------------------------------------------------------------
 -- | This module containing specialized function to generage sky contents.
 --
-{-# LANGUAGE Arrows                     #-}
-{-# LANGUAGE DeriveDataTypeable         #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 module Sky
     ( getResourceBodyIfExist
@@ -25,7 +22,6 @@ import qualified Text.Blaze.Html5.Attributes     as A
 
 import           Hakyll
 
-import           Config
 import           Post
 --------------------------------------------------------------------------------
 -- | Sky Rules to create sky pages
@@ -36,8 +32,8 @@ skyRules = do
     skysites <- buildSky "place" "sky/log/*.md" (fromCapture "sky/site/*.md")
     skyequips <- buildSky "equip" "sky/log/*.md" (fromCapture "sky/equip/*.md")
 
-    match ("sky/log/**.md") $ post "skylog" (dateRoute "sky/log/") (skylogCtx skybodies skysites skyequips)
-    match ("sky/*.md") $ post "skylog" idRoute (skylogCtx skybodies skysites skyequips)
+    match "sky/log/**.md" $ post "skylog" (dateRoute "sky/log/") (skylogCtx skybodies skysites skyequips)
+    match "sky/*.md" $ post "skylog" idRoute (skylogCtx skybodies skysites skyequips)
 
     create ["sky/body.html"] $ do
         route idRoute
@@ -100,11 +96,11 @@ skytagsRules :: String              -- snapshot
              -> String              -- Actual Tags
              -> Pattern             -- Pattern that includes these tags
              -> Rules ()            -- Return TagRule
-skytagsRules snapshot token pattern = do
+skytagsRules snapshot _ pat = do
 
     route $ setExtension ".html"
     compile $ do
-        logs <- recentFirst =<< loadAll pattern
+        logs <- recentFirst =<< loadAll pat
 
         let ctx = listField "posts" defaultContext (return logs) <>
                   defaultContext
@@ -156,7 +152,7 @@ skyequipField =
     tagsAsTitleFieldWith (getSky "equip") simpleRenderLink wrapWithLi
 
 -- | Render one tag link
-simpleRenderLink :: String -> (Maybe FilePath) -> Maybe H.Html
+simpleRenderLink :: String -> Maybe FilePath -> Maybe H.Html
 simpleRenderLink _   Nothing         = Nothing
 simpleRenderLink tag (Just filePath) =
   Just $ H.a ! A.href (toValue $ toUrl filePath) $ toHtml tag
@@ -166,7 +162,7 @@ simpleRenderLink tag (Just filePath) =
 -- render links
 tagsAsTitleFieldWith :: (Identifier -> Compiler [String])
               -- ^ Get the tags
-              -> (String -> (Maybe FilePath) -> Maybe H.Html)
+              -> (String -> Maybe FilePath -> Maybe H.Html)
               -- ^ Render link for one tag
               -> ([H.Html] -> H.Html)
               -- ^ Concatenate tag links
@@ -183,4 +179,4 @@ tagsAsTitleFieldWith getTags' renderLink cat key tags = field key $ \item -> do
         title <- getMetadataField (tagsMakeId tags tag) "title"
         return $ renderLink (fromMaybe tag title) route'
 
-    return $ renderHtml $ cat $ catMaybes $ links
+    return $ renderHtml $ cat $ catMaybes links
