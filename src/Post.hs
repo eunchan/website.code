@@ -1,4 +1,3 @@
-{-# LANGUAGE Arrows            #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Post
     ( post
@@ -26,8 +25,9 @@ module Post
 --------------------------------------------------------------------------------
 import           Control.Monad                   (filterM, forM)
 import           Data.Binary                     (Binary)
-import           Data.List                       (intercalate, isPrefixOf, sort)
+import           Data.List                       (intercalate, isPrefixOf, sortBy)
 import qualified Data.Map                        as M
+import           Data.Maybe                      (fromMaybe)
 import           Data.Time.Clock                 (UTCTime)
 import           Data.Time.Format                (defaultTimeLocale, formatTime,
                                                   parseTimeOrError)
@@ -55,7 +55,7 @@ post          :: String          -- snapshot name
               -> Rules ()
 post ss r ctx = do
     -- Adding default extention as html after all Routes are handled.
-    route $ r `composeRoutes` (setExtension ".html")
+    route $ r `composeRoutes` setExtension ".html"
 
     -- Include links.md content. In order to include this file, it should be
     -- loaded into cache by 'getResourceBody' function.
@@ -70,23 +70,21 @@ postCompile :: Item String      -- itemBody
             -> Identifier       -- firstTemplate
             -> Context String   -- Context
             -> Compiler (Item String)
-postCompile item ss tpl ctx = do
-    return item
-        >>= renderPandocWith defaultHakyllReaderOptions ekWriterOptions
-        >>= saveSnapshot ss
-        >>= templateAndUrl tpl ctx
+postCompile item ss tpl ctx =
+    renderPandocWith defaultHakyllReaderOptions ekWriterOptions item
+    >>= saveSnapshot ss
+    >>= templateAndUrl tpl ctx
 
 templateAndUrl :: Identifier        -- first templateAndUrl
                -> Context String    -- Context
                -> Item String       -- Item Body
                -> Compiler (Item String)
-templateAndUrl tpl ctx item = do
-    return item
-        >>= loadAndApplyTemplate tpl ctx
-        >>= loadDisqus ctx
-        >>= loadAndApplyTemplate "_tpl/default.html" ctx
-        >>= slashIndexUrls
-        >>= relativizeUrls
+templateAndUrl tpl ctx item =
+    loadAndApplyTemplate tpl ctx item
+    >>= loadDisqus ctx
+    >>= loadAndApplyTemplate "_tpl/default.html" ctx
+    >>= slashIndexUrls
+    >>= relativizeUrls
 
 -- | loadEverything that returns every post
 loadEverything :: (Binary a, Typeable a) => Compiler [Item a]
@@ -107,7 +105,7 @@ loadDisqus ctx item = do
         -- YAML parse "on" as true
         Just "true" -> loadAndApplyTemplate "_tpl/disqus.html" ctx item
         Just "on"   -> loadAndApplyTemplate "_tpl/disqus.html" ctx item -- for compatibility
-        _           -> return $ item
+        _           -> return item
 
 isPublic :: MonadMetadata m
          => Item a
@@ -136,7 +134,7 @@ postIsPublic :: Metadata -> Bool
 postIsPublic = metadataFieldIs "public" "true"
 
 postIsPublicOrDraft :: Metadata -> Bool
-postIsPublicOrDraft md = (postIsPublic md) || (metadataFieldIs "public" "draft" md)
+postIsPublicOrDraft md = postIsPublic md || metadataFieldIs "public" "draft" md
 
 moveToUpper :: Routes
 moveToUpper = customRoute stripTopDir
@@ -167,7 +165,7 @@ dateRoute prefix = metadataRoute (f prefix)
 
 -- | Add prefix then compose YYYY/MM/DD/post.html format ----------------------
 pullDateToFilePath :: FilePath -> Metadata -> Identifier -> FilePath
-pullDateToFilePath p m i = p </> (convertDateToFilePath m i)
+pullDateToFilePath p m i = p </> convertDateToFilePath m i
 
 convertDateToFilePath :: Metadata -> Identifier -> FilePath
 convertDateToFilePath md id' = convertLocalTimetoISO (getDate md) $ toFilePath id'
@@ -179,12 +177,10 @@ convertDateToFilePath md id' = convertLocalTimetoISO (getDate md) $ toFilePath i
 
 -- TODO: Make more format
 readTimeFromMetadataString :: String -> UTCTime
-readTimeFromMetadataString dateString = parseTimeOrError False defaultTimeLocale "%B %e, %Y" dateString
+readTimeFromMetadataString = parseTimeOrError False defaultTimeLocale "%B %e, %Y"
 
 getDate :: Metadata -> String
-getDate md = case lookupString "date" md of
-    Just v  -> v
-    Nothing -> ""
+getDate md = fromMaybe "" (lookupString "date" md)
 
 -- let timeFromString = readTime defaultTimeLocale "%d %b %Y %l:%M %p" dateString :: UTCTime
 --            Format YYYY/MM/DD HH:MM
@@ -211,7 +207,7 @@ prefixUrlsWith :: String  -- ^ New Path to switch
 prefixUrlsWith new pf = withUrls rel
   where
     isRel x = pf `isPrefixOf` x && not ("//" `isPrefixOf` x)
-    rel x   = if isRel x then new ++ (replaceAll pf (const "") x) else x
+    rel x   = if isRel x then new ++ replaceAll pf (const "") x else x
 
 -- | slashIndexUrls chops `index.html` to prettify URL address on the browser
 slashIndexUrls :: Item String
@@ -226,7 +222,7 @@ chopIndexHtml :: String
               -> String
 chopIndexHtml = withUrls ind
   where
-    ind x = if isIndexHtml x then (replaceAll "index.html" (const "") x) else x
+    ind x = if isIndexHtml x then replaceAll "index.html" (const "") x else x
     isIndexHtml x = "index.html" == takeFileName x
 
 --------------------------------------------------------------------------------
@@ -234,10 +230,9 @@ chopIndexHtml = withUrls ind
 type Year = String
 
 buildYears :: MonadMetadata m => Pattern -> m [(Year, Int)]
-buildYears pattern = do
-    --ids <- getMatches pattern
-    idmds <- getAllMetadata pattern
-    return . frequency . (filter isNotEmpty) .(map getYear) $ idmds
+buildYears pat = do
+    idmds <- getAllMetadata pat
+    return . frequency . filter isNotEmpty .map getYear $ idmds
   where
     frequency xs = M.toList (M.fromListWith (+) [(x,1) | x <- xs])
     isNotEmpty x =  x /= ""
@@ -263,26 +258,25 @@ yearId = fromFilePath . yearPath
 
 renderYears :: [(Year, Int)] -> Compiler String
 renderYears years = do
-    years' <- forM (reverse . sort $ years) $ \(year, count) -> do
-        -- route' <- getRoute $ yearId year
+    years' <- forM (sortBy (flip compare) years) $ \(year, count) ->
         return (year, count) -- (year, route', count)
     return . intercalate ", " $ map makeLink years'
   where
     makeLink (year, count) = -- (year, route', count) =
-      (renderHtml (H.a ! A.href (yearUrl year) $ toHtml year)) ++
+      renderHtml (H.a ! A.href (yearUrl year) $ toHtml year) ++
       " (" ++ show count ++ ")"
     yearUrl = toValue . toUrl . yearPath
 
 loadPostYear :: (Binary a, Typeable a) => Year -> Pattern -> Compiler [Item a]
-loadPostYear year pattern = do
-    posts <- loadAll pattern    -- Compiler [Item String]
+loadPostYear year pat = do
+    posts <- loadAll pat    -- Compiler [Item String]
     filterM (isYear year) posts
 
 isYear :: MonadMetadata m => Year -> Item a -> m Bool
 isYear year item = do
     metadata <- getMetadata $ itemIdentifier item
     return $ case lookupString "date" metadata of
-        Just v  -> year == (toYear v)
+        Just v  -> year == toYear v
         Nothing -> False
 
 --------------------------------------------------------------------------------
@@ -290,9 +284,9 @@ isYear year item = do
 type Slug = String
 
 buildSlugs :: MonadMetadata m => Pattern -> m [(Slug, Identifier)]
-buildSlugs pattern = do
-    idmds <- getAllMetadata pattern
-    return . (filter isNotEmpty). (map getSlug) $ idmds
+buildSlugs pat = do
+    idmds <- getAllMetadata pat
+    return . filter isNotEmpty . map getSlug $ idmds
   where
     -- TODO: Build based on filename when 'slug' doesn't exist
     getSlug idmd = case lookupString "slug" (snd idmd) of
@@ -304,9 +298,5 @@ renderSlugs :: [(Slug, Identifier)] -> Compiler String
 renderSlugs slugs = do
     links <- forM slugs $ \(slug, id') -> do
         idroute <- getRoute id'
-        return $ "[" ++ slug ++ "]: /" ++ (getJustRoute idroute)
+        return $ "[" ++ slug ++ "]: /" ++ fromMaybe "" idroute
     return . intercalate "\n" $ links
-  where
-    getJustRoute filepath = case filepath of
-        Just v  -> v
-        Nothing -> ""
