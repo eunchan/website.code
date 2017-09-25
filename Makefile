@@ -5,5 +5,5 @@ all: build install
 build:
 	stack build
 
-build:
+install:
 	stack install
