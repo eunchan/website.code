@@ -103,8 +103,8 @@ loadDisqus ctx item = do
     disqus <- getMetadataField (itemIdentifier item) "disqus" -- Maybe String
     case disqus of
         -- YAML parse "on" as true
-        Just "true" -> loadAndApplyTemplate "_tpl/disqus.html" ctx item
-        Just "on"   -> loadAndApplyTemplate "_tpl/disqus.html" ctx item -- for compatibility
+        --Just "true" -> loadAndApplyTemplate "_tpl/disqus.html" ctx item
+        --Just "on"   -> loadAndApplyTemplate "_tpl/disqus.html" ctx item -- for compatibility
         _           -> return item
 
 isPublic :: MonadMetadata m
