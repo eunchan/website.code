@@ -10,11 +10,11 @@ cabal-version:       >=1.18
 
 executable ssg
   main-is:             main.hs
-  build-depends:       base         >=4        && < 5     ,
+  build-depends:       base         >=4                   ,
                        binary       >= 0.8                ,
                        blaze-html   >= 0.5                ,
-                       hakyll       >= 4.8                ,
-                       pandoc       >= 1.13    && < 2     ,
+                       hakyll       >= 4.12               ,
+                       pandoc       >= 1.13               ,
                        containers   >= 0.5                ,
                        process      >= 1.2                ,
                        directory    >= 1.2                ,

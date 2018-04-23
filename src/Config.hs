@@ -35,5 +35,5 @@ feedConfiguration title = FeedConfiguration
 -- Detailed option is described in Text.Pandoc.Options
 ekWriterOptions :: WriterOptions
 ekWriterOptions = defaultHakyllWriterOptions
-    { writerHtml5           = True
-    }
+    -- { writeHtml5           = True
+    -- }
