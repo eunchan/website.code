@@ -13,6 +13,8 @@ module Post
     , isPublic
     , ekCtx
     , dateRoute
+    , monthRoute
+    , yearRoute
     , mediaUrls
     , slashIndexUrls
     , buildYears
@@ -161,19 +163,30 @@ ekCtx = mconcat
 dateRoute :: FilePath -> Routes
 dateRoute prefix = metadataRoute (f prefix)
   where
-    f p md = customRoute $ pullDateToFilePath p md
+    f p md = customRoute $ pullDateToFilePath "%Y/%m/%d" p md
+
+-- | Route based on metadata field 'date' but output as monthly ---------------
+monthRoute :: FilePath -> Routes
+monthRoute prefix = metadataRoute (f prefix)
+  where
+    f p md = customRoute $ pullDateToFilePath "%Y/%m" p md
+
+yearRoute :: FilePath -> Routes
+yearRoute prefix = metadataRoute (f prefix)
+    where
+    f p md = customRoute $ pullDateToFilePath "%Y" p md
 
 -- | Add prefix then compose YYYY/MM/DD/post.html format ----------------------
-pullDateToFilePath :: FilePath -> Metadata -> Identifier -> FilePath
-pullDateToFilePath p m i = p </> convertDateToFilePath m i
+pullDateToFilePath :: String -> FilePath -> Metadata -> Identifier -> FilePath
+pullDateToFilePath strf p m i = p </> convertDateToFilePath strf m i
 
-convertDateToFilePath :: Metadata -> Identifier -> FilePath
-convertDateToFilePath md id' = convertLocalTimetoISO (getDate md) $ toFilePath id'
+convertDateToFilePath :: String -> Metadata -> Identifier -> FilePath
+convertDateToFilePath strf md id' = convertLocalTimetoISO (getDate md) $ toFilePath id'
   where
     -- convertLocalTimetoISO :: String -> FilePath -> FilePath
     convertLocalTimetoISO d fp = toISO d </> chopDayFromFileName fp
     chopDayFromFileName fp' = replaceAll "[0-9]{4}-[0-9]{2}-[0-9]{2}-" (const "") $ takeFileName fp'
-    toISO dateString = formatTime defaultTimeLocale "%Y/%m/%d" $ readTimeFromMetadataString dateString
+    toISO dateString = formatTime defaultTimeLocale strf $ readTimeFromMetadataString dateString
 
 -- TODO: Make more format
 readTimeFromMetadataString :: String -> UTCTime

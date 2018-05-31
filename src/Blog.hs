@@ -43,9 +43,9 @@ blogRules :: Rules ()
 blogRules = do
     tags <- buildTags postsGlob (fromCapture "blog/tag/*.html")
 
-    matchMetadata postsGlob postIsPublic $ blogPost "blog"            -- snapshot name
-                                                    (dateRoute "blog/") -- Route
-                                                    defaultContext    -- context
+    matchMetadata postsGlob postIsPublic $ blogPost "blog"              -- snapshot name
+                                                    (yearRoute "blog/") -- Route
+                                                    defaultContext      -- context
 
     create ["blog/posts.html"] $ do
         route idRoute

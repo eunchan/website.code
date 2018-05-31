@@ -1,5 +1,5 @@
 name:                ssg
-version:             1.7
+version:             1.8
 license:             BSD3
 license-file:        LICENSE
 author:              Eunchan Kim
@@ -14,7 +14,7 @@ executable ssg
                        binary       >= 0.8                ,
                        blaze-html   >= 0.5                ,
                        hakyll       >= 4.12               ,
-                       pandoc       >= 1.13               ,
+                       pandoc       >= 2                  ,
                        containers   >= 0.5                ,
                        process      >= 1.2                ,
                        directory    >= 1.2                ,
