@@ -84,6 +84,7 @@ templateAndUrl :: Identifier        -- first templateAndUrl
 templateAndUrl tpl ctx item =
     loadAndApplyTemplate tpl ctx item
     >>= loadDisqus ctx
+    >>= mediaUrls ctx
     >>= loadAndApplyTemplate "_tpl/default.html" ctx
     >>= slashIndexUrls
     >>= relativizeUrls
@@ -199,7 +200,7 @@ getDate md = fromMaybe "" (lookupString "date" md)
 --            Format YYYY/MM/DD HH:MM
 -- formatTime defaultTimeLocale "%Y/%m/%d %H:%M" timeFromString
 
--- | Change /media/ to //media.eunchan.kim/ -----------------------------------
+-- | Change /media/ to //storage.eunchan.kim/ ----------------------------------
 --------------------------------------------------------------------------------
 -- | Compiler form of 'relativizeUrls' which automatically picks the right root
 -- path
@@ -208,7 +209,7 @@ mediaUrls item = do
     r <- getRoute $ itemIdentifier item
     return $ case r of
         Nothing -> item
-        Just _  -> fmap (prefixUrlsWith "//media.eunchan.kim/" "/media/") item
+        Just _  -> fmap (prefixUrlsWith "//storage.eunchan.kim/media/" "/media/") item
 
 
 --------------------------------------------------------------------------------

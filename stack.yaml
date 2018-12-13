@@ -5,4 +5,4 @@
 extra-package-dbs: []
 packages:
 - '.'
-resolver: lts-11.11
+resolver: lts-12.19
