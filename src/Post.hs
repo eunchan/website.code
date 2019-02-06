@@ -84,7 +84,7 @@ templateAndUrl :: Identifier        -- first templateAndUrl
 templateAndUrl tpl ctx item =
     loadAndApplyTemplate tpl ctx item
     >>= loadDisqus ctx
-    >>= mediaUrls ctx
+    >>= mediaUrls
     >>= loadAndApplyTemplate "_tpl/default.html" ctx
     >>= slashIndexUrls
     >>= relativizeUrls
