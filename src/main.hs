@@ -33,7 +33,7 @@ main = do
                 route idRoute
                 compile $ loadBody (fromFilePath "static/css/eunchan.scss")
                     >>= makeItem
-                    >>= withItemBody (unixFilter "sassc" ["-s", "-Istatic/css"])
+                    >>= withItemBody (unixFilter "pysassc" ["-s", "-Istatic/css"])
                     >>= return . fmap compressCss
 
         -- Static files except scss
