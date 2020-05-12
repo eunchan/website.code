@@ -12,12 +12,19 @@ import           Data.Maybe                      (isNothing)
 
 import           Control.Applicative             (Alternative (..))
 import           Data.List                       (findIndex, intercalate,
-                                                  isPrefixOf, sortBy, tails)
+                                                  isPrefixOf, sortBy, tails,
+                                                  foldl')
 
 import           Control.Monad                   (filterM, zipWithM_)
 
 import           Data.Time.Clock                 (UTCTime)
 import           Data.Time.Format                (defaultTimeLocale, parseTimeM)
+
+import           Text.Blaze.Html                 (toValue, (!))
+import           Text.Blaze.Html.Renderer.String (renderHtml)
+import qualified Text.Blaze.Html5                as H
+import qualified Text.Blaze.Html5.Attributes     as A
+import           Text.Blaze.Internal             (preEscapedString)
 
 import           System.FilePath                 (takeFileName)
 
@@ -69,8 +76,7 @@ blogRules = do
                     postsCtx =
                         field "title" (\_ -> return "Journal") `mappend`
                         constField "posts" (concat itembodies) `mappend`
-                        field "navlinkolder" (indexNavUrl index 1 maxIndex) `mappend`
-                        field "navlinknewer" (indexNavUrl index (-1) maxIndex) `mappend`
+                        field "pageList" (pageNavHtml index maxIndex) `mappend`
                         tagCloudField "taglist" 80 200 tags `mappend`
                         -- 카테고리는 blog/{category}/YYYY-MM-DD-title.md 형식일 때
                         -- buildCategories로 만들어짐. 현재 블로그에서는 사용하지 않음.
@@ -266,3 +272,46 @@ indexNavUrl n d maxn p =
       x  -> return x
   where refPage = if n + d < 1 || n + d > maxn then ""
                   else blogPageForPageIdx (n + d)
+
+indexNavLink :: Int -- target Page
+             -> Int -- current Page
+             -> String
+indexNavLink num cur =
+    if num == cur then numString
+    else renderHtml $ H.a ! A.href numLink $ numText
+  where numLink = toValue $ toUrl $ blogPageForPageIdx num
+        numText = preEscapedString numString
+        numString = show num
+        
+--------------------------------------------------------------------------------
+-- | Generate page list for navigating 10 pages at a time
+-- e.g. (x) <-- current page. no link
+--  1 | 2 | 3 | 4 | (5) | 6 | 7 | 8 | 9
+--
+-- e.g. 2
+--  (1) | 2 | 3 | 4 | ...
+--
+-- e.g. 3 : maxIndex is 13 and current index 13
+--  5 | ... | 11 | 12 | (13)
+pageNavHtml :: Int             -- index
+            -> Int             -- maxIndex
+            -> Item String     -- Not used
+            -> Compiler String -- return
+pageNavHtml n maxn p = do
+    let pageList = (lastN numPre ys) ++ (take numPost zs)
+
+    --prevListUrl <- indexNavUrl startIndex (-1) maxn p
+    --nextListUrl <- indexNavUrl endIndex 1 maxn p 
+    return $ (foldl renderlink "" pageList) ++ " | "
+  where renderlink s num = s ++ " | " ++ (indexNavLink num n)
+        (ys, zs) = splitAt n [1..maxn]
+        --lastN num xs = foldl' (const . drop 1) xs (drop num xs)
+        lastN num = reverse . take num . reverse
+        numPre = entryInRow - (min numEntry zsLen)
+        numPost = entryInRow - (min (numEntry+1) ysLen)
+        zsLen = length zs
+        ysLen = length ys
+        numEntry = 4
+        entryInRow = 2*numEntry + 1
+
+
