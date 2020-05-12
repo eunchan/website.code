@@ -9,7 +9,6 @@ module Blog
 
 --------------------------------------------------------------------------------
 import           Data.Maybe                      (isNothing)
-import           Data.Monoid                     ((<>))
 
 import           Control.Applicative             (Alternative (..))
 import           Data.List                       (findIndex, intercalate,
@@ -21,12 +20,6 @@ import           Data.Time.Clock                 (UTCTime)
 import           Data.Time.Format                (defaultTimeLocale, parseTimeM)
 
 import           System.FilePath                 (takeFileName)
-
-import           Text.Blaze.Html                 (toValue, (!))
-import           Text.Blaze.Html.Renderer.String (renderHtml)
-import qualified Text.Blaze.Html5                as H
-import qualified Text.Blaze.Html5.Attributes     as A
-import           Text.Blaze.Internal             (preEscapedString)
 
 import           Hakyll
 
@@ -76,8 +69,8 @@ blogRules = do
                     postsCtx =
                         field "title" (\_ -> return "Journal") `mappend`
                         constField "posts" (concat itembodies) `mappend`
-                        field "navlinkolder" (\_ -> return $ indexNavLink index 1 maxIndex) `mappend`
-                        field "navlinknewer" (\_ -> return $ indexNavLink index (-1) maxIndex) `mappend`
+                        field "navlinkolder" (indexNavUrl index 1 maxIndex) `mappend`
+                        field "navlinknewer" (indexNavUrl index (-1) maxIndex) `mappend`
                         tagCloudField "taglist" 80 200 tags `mappend`
                         -- 카테고리는 blog/{category}/YYYY-MM-DD-title.md 형식일 때
                         -- buildCategories로 만들어짐. 현재 블로그에서는 사용하지 않음.
@@ -259,14 +252,17 @@ chunk n xs = ys : chunk n zs
     where (ys,zs) = splitAt n xs
 
 --------------------------------------------------------------------------------
--- | Generate navigation link HTML for stepping between index pages.
+-- | Generate URL for stepping between index pages.
 -- https://github.com/ian-ross/blog
 --
-indexNavLink :: Int -> Int -> Int -> String
-indexNavLink n d maxn = renderHtml ref
-  where ref = if refPage == "" then ""
-              else H.a ! A.href (toValue $ toUrl refPage) $
-                   preEscapedString lab
-        lab = if d > 0 then "Older Entries &raquo;" else "&laquo; Newer Entries"
-        refPage = if n + d < 1 || n + d > maxn then ""
+indexNavUrl :: Int
+            -> Int
+            -> Int
+            -> Item String
+            -> Compiler String
+indexNavUrl n d maxn p = 
+    case refPage of
+      "" -> empty
+      x  -> return x
+  where refPage = if n + d < 1 || n + d > maxn then ""
                   else blogPageForPageIdx (n + d)
