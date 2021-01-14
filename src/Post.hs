@@ -183,15 +183,19 @@ pullDateToFilePath strf p m i = p </> convertDateToFilePath strf m i
 
 convertDateToFilePath :: String -> Metadata -> Identifier -> FilePath
 convertDateToFilePath strf md id' = convertLocalTimetoISO (getDate md) $ toFilePath id'
+  -- TODO: Check if metadata `date` field exists.
   where
     -- convertLocalTimetoISO :: String -> FilePath -> FilePath
+    -- TODO: Check if empty date string
     convertLocalTimetoISO d fp = toISO d </> chopDayFromFileName fp
     chopDayFromFileName fp' = replaceAll "[0-9]{4}-[0-9]{2}-[0-9]{2}-" (const "") $ takeFileName fp'
     toISO dateString = formatTime defaultTimeLocale strf $ readTimeFromMetadataString dateString
 
 -- TODO: Make more format
 readTimeFromMetadataString :: String -> UTCTime
-readTimeFromMetadataString = parseTimeOrError False defaultTimeLocale "%B %e, %Y"
+readTimeFromMetadataString dateString = case dateString of
+    "" -> parseTimeOrError False defaultTimeLocale "%B %e, %Y" "January 1, 2000"
+    _ -> parseTimeOrError False defaultTimeLocale "%B %e, %Y" dateString
 
 getDate :: Metadata -> String
 getDate md = fromMaybe "" (lookupString "date" md)
