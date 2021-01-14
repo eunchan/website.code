@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-15.4
+resolver: lts-16.29
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -38,7 +38,6 @@ packages:
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
 extra-deps:
-  - hakyll-4.13.2.0
   - 'lrucache-1.2.0.1'
   - 'http2-1.6.5'
   - 'warp-3.2.28'
